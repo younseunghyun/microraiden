@@ -11,7 +11,8 @@ from microraiden.constants import TKN_DECIMALS
 from microraiden.examples.demo_resources import (
     PaywalledDoggo,
     PaywalledFortune,
-    PaywalledTeapot
+    PaywalledTeapot,
+    BuyablePaywalledTeapot
 )
 
 
@@ -41,7 +42,8 @@ def start(app, host, port, index_file):
     app.add_paywalled_resource(PaywalledFortune, '/fortunes_cn', 1 * TKN_DECIMALS,
                                resource_class_args=(fortunes_cn,))
     app.add_paywalled_resource(PaywalledDoggo, '/doggo.txt', price=2 * TKN_DECIMALS)
-    app.add_paywalled_resource(PaywalledTeapot, '/teapot', 3 * TKN_DECIMALS)
+    app.add_paywalled_resource(PaywalledTeapot, '/teapot', price=2 * TKN_DECIMALS)
+    app.add_paywalled_resource(BuyablePaywalledTeapot, '/buyable-teapot', price=2 * TKN_DECIMALS)
 
     if index_file:
         app.app.add_url_rule('/', 'index', lambda: send_file(index_file))
@@ -52,6 +54,7 @@ def start(app, host, port, index_file):
 
 if __name__ == '__main__':
     from gevent import monkey
+
     monkey.patch_all()
     logging.basicConfig(level=logging.DEBUG)
     logging.getLogger("urllib3").setLevel(logging.WARNING)

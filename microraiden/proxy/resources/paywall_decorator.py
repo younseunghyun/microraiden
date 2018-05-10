@@ -17,6 +17,8 @@ from microraiden.proxy.resources.request_data import RequestData
 from functools import wraps
 from eth_utils import is_address
 
+from microraiden.paying.PayManager import PayManagerFactory
+
 log = logging.getLogger(__name__)
 
 
@@ -33,6 +35,7 @@ class Paywall(object):
         self.receiver_address = channel_manager.receiver
         self.channel_manager = channel_manager
         self.light_client_proxy = light_client_proxy
+        self.pay_manager = PayManagerFactory.get_instance()
 
     def access(self, resource, method, *args, **kwargs):
         if self.channel_manager.node_online() is False:
@@ -59,6 +62,8 @@ class Paywall(object):
                 return self.reply_webui(reply_data, headers)
             elif paywall:
                 return make_response('', 402, headers)
+            # write, payment history
+            self.pay_manager.register_paid(data.sender_address, request.path)
 
         # all ok, return actual content
         resp = method(request.path, *args, **kwargs)
@@ -128,14 +133,12 @@ class Paywall(object):
             })
         if channel.last_signature is not None:
             headers.update({header.BALANCE_SIGNATURE: channel.last_signature})
-
         amount_sent = data.balance - channel.balance
 
         if amount_sent != 0 and amount_sent != price:
             headers[header.INVALID_AMOUNT] = 1
             #  if difference is 0, it will be handled by channel manager
             return True, headers
-
         # set the headers to reflect actual state of a channel
         try:
             self.channel_manager.register_payment(

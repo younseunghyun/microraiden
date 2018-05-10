@@ -1,7 +1,9 @@
+from flask import make_response
+
+from .BuyableExpensive import BuyableExpensive
+from microraiden.proxy.resources import Expensive
 from .fortunes import PaywalledFortune
 from .wikipaydia import PaywalledWikipedia
-from microraiden.proxy.resources import Expensive
-from flask import make_response
 
 
 class PaywalledDoggo(Expensive):
@@ -22,6 +24,11 @@ class PaywalledDoggo(Expensive):
 class PaywalledTeapot(Expensive):
     def get(self, url):
         return "HI I AM A TEAPOT", 418
+
+
+class BuyablePaywalledTeapot(BuyableExpensive):
+    def get(self, url):
+        return "HI I AM A TEAPOT, YOU GOT IT", 418
 
 
 class PaywalledEchoFix(Expensive):
